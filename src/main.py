@@ -28,13 +28,13 @@ class Entity(object):
         """Moves the Entity up."""
         if self.y == 0:
             return
-        self.y -= 1
+        self.y -= 10
 
     def down(self):
         """Moves the Entity down."""
         if self.y == self.max_y:
             return
-        self.y += 1
+        self.y += 10
 
     def render(self, surface):
         """Blits the Entity on `surface`."""
@@ -58,16 +58,13 @@ class Player(Entity):
         """Accelerates the Player."""
         if self.x == self.max_x:
             return
-        if self.x == 0:
-            self.x = 1
-        else:
-            self.x *= 1.1
+        self.x += 5
 
     def decelerate(self):
         """Decelerates the Player."""
         if self.x == 0:
             return
-        self.x /= 2
+        self.x -= 5
 
 class Deer(Entity):
     def __init__(self, move_type, *args):
@@ -113,12 +110,13 @@ class Game(object):
         pygame.mouse.set_visible(1)
 
         self.player = Player(0, self.height // 2, self.width, self.height)
+        self.deer = []
 
         # Tastendruck wiederholt senden, falls nicht losgelassen
         pygame.key.set_repeat(1, 30)
         self.clock = pygame.time.Clock()
         self.running = False
-        self.speed = 5
+        self.speed = 10
 
     def set_street_img(self, path):
         img = pygame.image.load(path)
@@ -145,10 +143,8 @@ class Game(object):
         img = pygame.image.load(path)
         img = img.convert_alpha()
         scale = img.get_height() / (self.height / 5.0)
-        print(img.get_width(), img.get_height(), scale)
         img = pygame.transform.scale(img, (int(round(img.get_width() / scale)),
             int(round(img.get_height() / scale))))
-        print(img.get_width(), img.get_height())
         self.player.img = img
 
     def set_deer_img(self, path):
@@ -167,8 +163,21 @@ class Game(object):
             for ev in pygame.event.get():
                 if ev.type == pygame.QUIT:
                     sys.exit()
-                elif ev.type == pygame.KEYDOWN:
 
+            keys = pygame.key.get_pressed()
+
+            if keys[pygame.K_RIGHT]:
+                self.player.accelerate()
+            else:
+                self.player.decelerate()
+            if keys[pygame.K_LEFT]:
+                self.player.decelerate()
+            if keys[pygame.K_UP]:
+                self.player.up()
+            if keys[pygame.K_DOWN]:
+                self.player.down()
+            if keys[pygame.K_ESCAPE]:
+                sys.exit()
 
             pos += self.speed
             pos %= self.scaled_street.get_width()
