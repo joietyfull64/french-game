@@ -7,7 +7,7 @@ from math import ceil
 
 import pygame
 
-#Christoph: ich gehe davon, dass die Position eines Objekts immer die obere linke Ecke ist
+#Christoph: ich gehe davon aus, dass die Position eines Objekts immer die obere linke Ecke ist
 #img.width - Länge des Bildes, img.height - Höhe des Bildes
 #screen.width - Länge des Fensters, screen,height - Höhe des Fensters
 #random(arg1, arg2) - a random value in the given range; arg1 - inclusive start of range, arg2 - inclusive end of range
@@ -123,9 +123,42 @@ class Player(Entity):
         
     def hasCrashed(self):
         # use self.speed
-        interference = (False,False)
+        interference = False
         #the following is the simplest algorithm possibility but it takes a few more time
         for deer in deers:
+            #speeds = (, )
+            objects = (self, deer)
+            i = 1; i2 = 0
+            if sqrt(self.speed[0]**2 + self.speed[1]**2) > sqrt(deer.speed[0]**2 + deer.speed[1]**2):
+                i = 0; i2 = 1
+            #speed1 = speeds[i]
+            #speed2 = speeds[i2]
+            #speeds = None
+            collision1 = (float(objects[i].img.width), float(objects[i].img.height)) #1 is for the quicker object
+            origin1 = (objects[i].img.width, objects[i].img.height)
+            distance1 = (objects[i].speed[0], objects[i].speed[1])
+            collision2 = (float(objects[i2].img.width), float(objects[i2].img.height))
+            origin2 = (objects[i2].img.width, objects[i2].img.height)
+            distance2 = (objects[i2].speed[0], objects[i2].speed[1])
+            objects = None
+            if distance2[0] < distance2[1]:
+                i = 0; i2 = 1
+            else:
+                i = 1; i2 = 0
+            #i3 = 1; i4 = 0
+            #if distance1[0] < distance1[1]:
+            #    i3 = 0; i4 = 1
+            sign = (distance2[i] >>> 31) | 1
+            speed2 = float(distance2[i2])/float(distance2[i])*sign
+            speed1 = float(distance1[i])/float(abs(distance2[i])) # 1/kleineEntfernungVomLangsamerenObjekt = Faktor
+            speed12 = float(distance1[i2])/float(abs(distance2[i]))
+            while not int(collision2[i]) == (origin2[i]+distance2[i]) and not interference:
+                collision2[i] += sign
+                collision2[i2] += speed2
+                collision1[i] += speed1
+                collision1[i2] += speed12
+                interference = Game.carCollidesAnimal(collision1, collision2)
+            
             for i in range(0,1):  #check twice, for x-axis and for y-axis
             #TODO: funktioniert nicht ganz, x-Achsenprüfung ist unabhängig von y-Achse
                 if (self.speed[i] > deer.speed[i]):
@@ -150,7 +183,7 @@ class Player(Entity):
                         deerPosition[i] = int(testPositionQuicker)
                         carPosition[i] += 1
                         interference[i] = carCollidesDeer(carPosition, deerPosition)
-        return interference[0] and interference[1]
+        return interference
 #--
 
 class Deer(Entity):
@@ -229,6 +262,13 @@ class Deer(Entity):
 #           self.position[0] -= gameSpeed-10
 
 class Game(object):
+#Christoph:
+    # we need them static because they are used by a static collision detection function which is static so that other
+    # classes can use it
+    player = Player(0, self.height // 2, self.width, self.height)
+    deers = []
+#--
+    
     def __init__(self, width=800, height=600):
         """
         Initializes the Game instance. Arguments:
@@ -250,9 +290,9 @@ class Game(object):
         pygame.display.set_caption("Passée")
         pygame.mouse.set_visible(1)
 
-        self.player = Player(0, self.height // 2, self.width, self.height)
+        self.player = Player(0, self.height // 2, self.width, self.height) #only the class variable should be used
         self.deer = [] #sollte möglichst deers heißen damit man die Laufvariable in for-Schleifen deer nennen kann
-
+                        #sollte nur als Klassenvariable verwendet werden
         # Tastendruck wiederholt senden, falls nicht losgelassen
         pygame.key.set_repeat(1, 30)
         self.clock = pygame.time.Clock()
@@ -262,8 +302,8 @@ class Game(object):
 
 #Christoph:
     def resetGameScene(self): #set up everything
-        self.player = Player(...) # playerCar is static
-        self.deers = []
+        Game.player = Player(...) # player should become a class variable
+        Game.deers = []
         self.gameSpeed = 10
         self.roadOffset = 0
         self.survivedDeers = 0
@@ -307,9 +347,21 @@ class Game(object):
             self.width -= 1
     
     ##New (4.11.):
-    def carCollidesDeer(sel, carPosition, deerPosition):
+    @staticmethod
+    def carCollidesDeer(carPosition, deerPosition, deerIndex = 0):
         #prüfe alle vier Ecken beider Rechtecke, ob sie im jeweils anderen Rechteck drin sind
-        pass
+        collides = False
+        carCorners = ((carPosition[0], carPosition[1]), (carPosition[0]+Game.player.img.width, carPosition[1]), (carPosition[0]+Game.player.img.width, carPosition[1]+Game.player.img.height), (carPosition[0], carPosition[1]+Game.player.img.height))
+        deerCorners = ((deerPosition[0], deerPosition[1]), (deerPosition[0]+Game.deers[deerIndex].img.width, deerPosition[1]), (deerPosition[0]+Game.deers[deerIndex].img.width, deerPosition[1]+Game.deers[deerIndex].img.height), (deerPosition[0], deerPosition[1]+Game.deers[deerIndex].img.height))
+        for i in range(4):
+            if :
+                break
+        
+        if not collides:
+            for i in range(4)
+                if :
+                    break
+        pass collides
 #--
 
     def set_street_img(self, path):
