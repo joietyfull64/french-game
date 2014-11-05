@@ -40,7 +40,9 @@ class Entity(object):
 #       upperBound = screen.height/2-max_y/2
 #       if (self.position[1] - upperBounds) < self.speed[1]: #upperBound muss nicht unbedingt 0 sein
 #          self.position[1] = upperBound
-#       else: self.position[1] -= self.speed[1]
+#       else:
+#           self.speed[1] = -abs(self.speed[1]) #we need this because the position will be modified in other functions with +=
+#           self.position[1] += self.speed[1]
 
     def down(self):
         """Moves the Entity down."""
@@ -50,19 +52,25 @@ class Entity(object):
 #       lowerBound = screen.height/2+max_y/2
 #       if (screen.height-lowerBound-(self.img.height+self.position[1]) < self.speed[1]:
 #           self.position[1] = screen.height-lowerBound-self.img.height
-#       else: self.position[1] += self.speed[1]
+#       else:
+#           self.speed[1] = abs(self.speed[1])
+#           self.position[1] += self.speed[1]
 #Christoph:
     def left(self):
         leftBound = screen.width/2-max_x/2
         if (self.position[0] - leftBounds) < self.speed[0]:
             self.position[0] = leftBounds
-        else: self.position[0] -= self.speed[0]
+        else:
+            self.speed[0] = -abs(self.speed[0])
+            self.position[0] += self.speed[0]
 
     def right(self):
         rightBound = screen.width/2+max_x/2
         if (screen.width-rightBound-(self.img.width+self.position[0])) < speed[0]:
             self.position[0] = screen.width-rightBound-img.width
-        else: self.position[0] += speed[0]
+        else:
+            self.speed[0] = abs(self.speed[0])
+            self.position[0] += speed[0]
 #--
 
     def render(self, surface):
@@ -96,7 +104,9 @@ class Player(Entity):
 #       leftBound = screen.width/2-max_x/2
 #       if (self.position[0] - leftBounds) < (self.speed[0] if not boost else (self.speed[0]*self.boostFactor)):
 #           self.position[0] = leftBounds
-#       else: self.position[0] -= self.speed[0] if not boost else (self.speed[0]*self.boostFactor)
+#       else:
+#           self.speed[0] = -abs(self.speed[0])
+#           self.position[0] -= self.speed[0] if not boost else (self.speed[0]*self.boostFactor)
 
     def accelerate(self):
         """Accelerates the Player."""
@@ -106,20 +116,26 @@ class Player(Entity):
 #       rightBound = screenWidth/2+max_x/2
 #       if (screen.width-rightBound-(self.img.width+self.position[0])) < (self.speed[0] if not boost else (self.speed[0]*self.boostFactor)):
 #           self.position[0] = screen.width-rightBound-self.img.width
-#       else: self.position[0] += self.speed[0] if not boost else (self.speed[0]*self.boostFactor)
+#       else:
+#           self.speed[0] = abs(self.speed[0])
+#           self.position[0] += self.speed[0] if not boost else (self.speed[0]*self.boostFactor)
 
 #Christoph:
     def up(self): #override
         upperBound = screen.height/2-max_y/2
         if (self.position[1] - upperBound) < self.speed[1]: #upperBound muss nicht unbedingt 0 sein
            self.position[1] = upperBound
-        else: self.position[1] -= self.speed[1]
+        else:
+            self.speed[1] = -abs(self.speed[1])
+            self.position[1] += self.speed[1]
         
     def down(self): #override
         lowerBound = screen.height/2+max_y/2
         if (screen.height-lowerBound-(self.img.height+self.position[1]) < self.speed[1]:
             self.position[1] = screen.height-lowerBound-self.img.height
-        else: self.position[1] += self.speed[1]
+        else:
+            self.speed[1] = abs(self.speed[1])
+            self.position[1] += self.speed[1]
         
     def hasCrashed(self):
         # use self.speed
@@ -183,6 +199,7 @@ class Player(Entity):
                         deerPosition[i] = int(testPositionQuicker)
                         carPosition[i] += 1
                         interference[i] = carCollidesDeer(carPosition, deerPosition)
+        self.speed = (0,0)
         return interference
 #--
 
