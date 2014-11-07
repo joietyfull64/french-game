@@ -24,10 +24,10 @@ import pygame
 #        #self.max_x = max_x
 #        #self.max_y = max_y
 #        #self.img = img #ist gleichzeitig die Größe 
-#        #self.street = street # brauchen wir nicht, da wir schon self.screen in Game.instance haben
+#        #Game.instance.screen = street # brauchen wir nicht, da wir schon self.screen in Game.instance haben
 #        #self.game_speed = game_speed # hab ich in die Klasse Game in eine Klasseninstanz gemacht
 
-class Player(Entity):
+class Player(object):
 
     def __init__(self, x, y, img):
         """Initializes the Player instance. Arguments:
@@ -128,26 +128,26 @@ class Player(Entity):
 #        return interference
 #--
     def up(self):
-#Christoph: added conditional operator with self.boost and alignable street bounds
+#Christoph: added conditional operator with self.boost and changable screen bounds
         """Moves the Player up."""
-        if self.hitbox.top > self.street.top+self.bounds[0]:
+        if self.hitbox.top > Game.instance.screen.top+self.bounds[0]:
             self.hitbox = self.hitbox.move(0, ((-Game.instance.screen.height / 30) if not self.boost else (-Game.instance.screen.height/30*self.boostFactor)) )
 
     def down(self):
         """Moves the Player down."""
-        if self.hitbox.bottom < self.street.bottom+self.bounds[1]:
+        if self.hitbox.bottom < Game.instance.screen.bottom+self.bounds[1]:
             self.hitbox = self.hitbox.move(0, ((Game.instance.screen.height / 30) if not self.boost else (Game.instance.screen.height/30*self.boostFactor)) )
 
     def accelerate(self):
         """Accelerates the Player."""
-        if self.hitbox.right < self.street.right+self.bounds[3]:
+        if self.hitbox.right < Game.instance.screen.right+self.bounds[3]:
 #            print "ACC"
             self.hitbox = self.hitbox.move( ((Game.instance.screen.width / 120) if not self.boost else (Game.instance.screen.width/120*self.boostFactor)), 0)
 #        else:
-#            print self.hitbox.right, self.street.right
+#            print self.hitbox.right, Game.instance.screen.right
     def decelerate(self):
         """Decelerates the Player."""
-        if self.hitbox.left > self.street.left+self.bounds[2]:
+        if self.hitbox.left > Game.instance.screen.left+self.bounds[2]:
 #            print "DEC"
             self.hitbox = self.hitbox.move( ((-Game.instance.screen.width / 120) if not self.boost else (-Game.instance.screen.width/120*self.boostFactor)), 0)
 
@@ -168,7 +168,7 @@ class Player(Entity):
         """Blits the Player on 'surface'."""
         surface.blit(self.img, self.hitbox)
 
-class Deer(Entity):
+class Deer(object):
     #the x and y coordinate will be set randomly
     def __init__(self, move_type, imgs):
         """Initializes the Deer instance. Arguments:
@@ -185,14 +185,15 @@ class Deer(Entity):
         self.speed_x = 0 #we need it for movment_type 8 & 9
         self.speed_y = 0 #we need it for movement_type 4 & 5
         #self.hitbox = self.hitbox() #instead of self.hitbox use self.hitbox()
-        self.longestImgWidth = imgs[0] #benutzt in isAway() und hier drunter
-        self.longestImgHeight = imgs[0]
+        self.longestImgWidth = imgs[0].get_width() #benutzt in isAway() und hier drunter
+        self.longestImgHeight = imgs[0].get_height()
         if len(imgs) > 1:
             for i in imgs:
                 if i.get_width() > self.longestImgWidth:
                     self.longestImgWidth = i.get_width()
                 if i.get_height() > self.longestImgHeight:
                     self.longestImgHeight = i.get_height()
+        
          #beta version:
 #        # 0
 #        if move_type == 0:
@@ -227,49 +228,53 @@ class Deer(Entity):
 #        # > 6
 #        else:
 #            self.position = (screen.width, random((screen.height/2-max_y/2), (screen.height/2+max_y/2)))
+
         #starting positions of the move_types
         g = Game.instance
         if self.move_type == 2:
             self.x = g.screen.width
-            self.y = random(g.screen.height/2, g.screen.height+g.bounds[1]-self.longestImgHeight))
+            self.y = randint(g.screen.height/2, g.screen.height+g.bounds[1]-self.longestImgHeight))
         elif self.move_type == 3:
             self.x = g.screen.width
-            self.y = random(g.bounds[0], g.screen/2-self.longestImgHeight)
+            self.y = randint(g.bounds[0], g.screen/2-self.longestImgHeight)
         elif self.move_type == 4:
             self.x = g.screen.width
-            self.y = random(g.player.y,g.screen.height-self.longestImgheight+g.bounds[1])
-            self.speed_y = ((g.player.y+g.player.hitbox.height/2)-(self.y+self.hitbox().height/2))/((g.player.x+g.player.hitbox.width/2)-(self.x+self.hitbox().width/2))*g.game_speed
+            self.y = randint(g.player.y,g.screen.height-self.longestImgheight+g.bounds[1])
+            hitbox = self.hitbox()
+            self.speed_y = ((g.player.y+g.player.hitbox.height/2)-(self.y+hitbox.height/2))/((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))*g.game_speed
         elif self.move_type == 5:
             self.x = g.screen.width
-            self.y = random(g.bounds[0], g.player.y+g.player.height-self.longestImgHeight)
-            self.speed_y = ((g.player.y+g.player.hitbox.height/2)-(self.y+self.hitbox().height/2))/((g.player.x+g.player.hitbox.width/2)-(self.x+self.hitbox().width/2))*g.game_speed
+            self.y = randint(g.bounds[0], g.player.y+g.player.height-self.longestImgHeight)
+            hitbox = self.hitbox()
+            self.speed_y = ((g.player.y+g.player.hitbox.height/2)-(self.y+hitbox.height/2))/((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))*g.game_speed
         elif self.move_type == 6 or self.move_type == 8:
-            self.x = random(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
+            self.x = randint(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
             self.y = -imgs[0].height
         elif self.move_type == 8:
-            self.x = random(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
+            self.x = randint(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
             self.y = -imgs[0].height
-            self.speed_x = ((g.player.x+g.player.hitbox.width/2)-(self.x+self.hitbox().width/2))/((g.player.y+g.player.hitbox.height/2)-(self.y+self.hitbox().height/2))*g.screen.height/120
+            hitbox = self.hitbox()
+            self.speed_x = ((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))/((g.player.y+g.player.hitbox.height/2)-(self.y+hitbox.height/2))*g.screen.height/120
         elif self.move_type == 7 or self.move_type == 9:
-            self.x = random(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
+            self.x = randint(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
             self.y = g.screen.height
         elif self.move_type == 9:
-            self.x = random(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
+            self.x = randint(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
             self.y = g.screen.height
-            self.speed_x = ((g.player.x+g.player.hitbox.width/2)-(self.x+self.hitbox().width/2))/((g.player.y+g.player.hitbox.height/2)-(self.y+self.hitbox().height/2))*g.screen.height/120
+            hitbox = self.hitbox()
+            self.speed_x = ((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))/((g.player.y+g.player.hitbox.height/2)-(self.y+hitbox.height/2))*g.screen.height/120
         else: #0 & 1 & 10 & 11
             if self.move_type == 10: self.speed_y = -g.vertical_deer_speed
             elif self.move_type == 11: self.speed_y = g.vertical_deer_speed
             self.x = g.screen.width
-            self.y = random(g.bounds[0], g.screen.height-self.longestImgHeight+g.bounds[1])
+            self.y = randint(g.bounds[0], g.screen.height-self.longestImgHeight+g.bounds[1])
 
-    def hitbox():
+    def hitbox(self):
         """Returns the current hitbox for the current image"""
         return self.imgs[img].get_rect().move(self.x, self.y)
 
     def move(self):
         """Moves the Deer according to its move_type. The movements are:
-#--
         0 = Moves to the left at Game.speed
         1 = Moves to the left at half Game.speed
         2 = Walks to the left and up
@@ -316,11 +321,8 @@ class Deer(Entity):
 #--
         #position changes for move_types
         g = Game.instance
-        if self.move_type == 0:
-            #self.hitbox = self.hitbox.move(-g.game_speed, 0) #instead, we only modify self.x and self.y
-            self.x -= g.game_speed
-#           print "MOVED %s" % self.hitbox
-        elif self.move_type == 1:
+        #if self.move_type == 0 is at the end of the function
+        if self.move_type == 1:
             self.x -= g.game_speed/2
         elif self.move_type == 2:
             self.x -= g.game_speed,
@@ -350,6 +352,9 @@ class Deer(Entity):
                 self.speed_y *= -1
             else:
                 self.y += self.speed_y
+        else: # 0 & others
+            self.x -= g.game_speed
+#       print "MOVED %s" % self.hitbox
 
     def set_imgs(self, imgs, x = self.x, y = self.y):
         """Sets the image of the Deer. Argument:
@@ -373,8 +378,10 @@ class Deer(Entity):
 
     def next_img(self):
         """Returns the next image in the animation"""
-        self.img += 1
-        self.img %= len(self.imgs)
+        if self.img >= len(self.imgs)-1:
+            self.img = 0
+        else:
+            self.img += 1
         return self.imgs[self.img]
 
     def render(self, surface):
@@ -392,8 +399,9 @@ class Game(object):
         - eine besondere Farbe für Rehe verschiedener move_typen
         - Autos auf der Gegenspur"""
 #Christoph:
-    # is needed for staticmethods from this class and to call instance variables with other classes' methods
+    # is needed to call instance variables with other classes' methods
     instance = Game()
+    second = 30
 #--
     def __init__(self, width=1200, height=400):
         """
@@ -402,28 +410,25 @@ class Game(object):
         height     = window height
         """
         # Initialisierung
+        self.width = width
+        self.height = height
 #Christoph:
         self.startmenu = True
         self.pause = False
         self.gameOver = False
+        self.restart = False
         self.survivedDeer = 0
-        self.maximumSpeed = 50 #pixels per frame
-#--
-        self.width = width
-        self.height = height
-#Christoph:
+        self.pos = 0
         self.bounds = (0,-0,0,-0) #up, down, left, right; determines the smallest possible distance from the player to the street edge
-        self.deer_vertical_speed = (self.height+self.bounds[0]+self.bounds[1])/120 #used for Deer.move()
+        self.deer_vertical_speed = (self.height+self.bounds[0]+self.bounds[1])/(Game.second*2) #used for Deer.move()
 #--
-
         pygame.init()
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("Passée")
         pygame.mouse.set_visible(1)
         
         self.game_speed = 10
-        #ich brauch noch eine Bildvariable für img
-        self.player = Player(self.bounds[2], self.height//2, img)
+        self.player = Player(self.bounds[2], self.height//2, self.player_img)
 
         self.deer = []
         self.next_deer = 30
@@ -436,27 +441,33 @@ class Game(object):
         self.running = False
 
 #Christoph:
-    def resizeScreen(self, x = self.width, y = self.height):
-        self.width = x
-        self.height = y
-        self.screen = pygame.display.set_mode((self.width, self.height))
+#    #does not resize the content
+#    def resizeScreen(self, x = self.width, y = self.height):
+#        self.width = x
+#        self.height = y
+#        self.screen = pygame.display.set_mode((self.width, self.height))
         
-    def resetGameScene(self): #set up everything
-        self.player = Player(self.bounds[2], self.height//2, img) # player should become a class variable
+    def resetGameScene(self):
+        #Game.instance = Game() #this only works, if this method and run() are staticmethods; begins always with startmenu
+        self.player = Player(self.bounds[2], self.height//2, self.player_img)
         self.deer = []
         self.survivedDeer = 0
         self.startmenu = False
         self.pause = False
         self.gameOver = False
-        self.speed = 10
+        self.game_speed = 10
+        self.next_deer = 30
+        self.next_deer_max = 90
+        self.next_deer_min = 70
+        self.running = False
+        self.restart = True #will restart run()
         #self.clock = pygame.time.Clock()
     
     def createFrame(self, surface):
         #draw background
-        pos = 0
-        pos += self.game_speed
-        pos %= self.scaled_street.get_width()
-        self.screen.blit(self.get_street_img(pos), (0, 0))
+        self.pos += self.game_speed
+        self.pos %= self.scaled_street.get_width()
+        self.screen.blit(self.get_street_img(self.pos), (0, 0))
         #draw player
         self.player.render(self.screen)
         #draw deer
@@ -477,50 +488,51 @@ class Game(object):
     def renderControls(self, surface):
         # draw and write something on the screen
     
-    #unused:
-    def screenShrinks(self): #a funny idea, when playing -> the game window shrinks per 150 frames by 1 pixel for more difficulty
-        if self.screen.width > 200 and (Game.frameCounter > 0 and Game.frameCounter % 150 == 0):
-            self.resizeScreen(int(round(float((self.screen.width-1) // self.screen.width) * self.screen.height)), self.height-1)
+#    #unused:
+#    def screenShrinks(self): #a funny idea, when playing -> the game window shrinks per 150 frames by 1 pixel for more difficulty
+#        if self.screen.width > 200 and (Game.frameCounter > 0 and Game.frameCounter % 150 == 0):
+#            self.resizeScreen(int(round(float((self.screen.width-1) // self.screen.width) * self.screen.height)), self.height-1)
     
-    #unused
-    def screenGrows(self):
-        if self.screen.width < 1820 and (Game.frameCounter > 0 and Game.frameCounter % 150 == 0):
-            self.resizeScreen(int(round(float(self.screen.width // (self.screen.width-1) * self.screen.height))), self.height+1)
+#    #unused
+#    def screenGrows(self):
+#        if self.screen.width < 1820 and (Game.frameCounter > 0 and Game.frameCounter % 150 == 0):
+#            self.resizeScreen(int(round(float(self.screen.width // (self.screen.width-1) * self.screen.height))), self.height+1)
     
-    #unused:
-    @staticmethod
-    def carCollidesDeer(carPosition, deerPosition, deerIndex = 0):
-        #prüfe alle vier Ecken beider Rechtecke, ob sie im jeweils anderen Rechteck drin sind
-        collides = False
-        corners = ( ((carPosition[0], carPosition[1]), (carPosition[0]+Game.instance.player.hitbox.get_width(), carPosition[1]), (carPosition[0]+Game.instance.player.hitbox.get_width(), carPosition[1]+Game.instance.player.hitbox.get_height()), (carPosition[0], carPosition[1]+Game.instance.player.hitbox.get_height())),
-                ((deerPosition[0], deerPosition[1]), (deerPosition[0]+Game.instance.deer[deerIndex].hitbox().get_width(), deerPosition[1]), (deerPosition[0]+Game.instance.deer[deerIndex].hitbox().get_width(), deerPosition[1]+Game.instance.deer[deerIndex].hitbox().get_height()), (deerPosition[0], deerPosition[1]+Game.instance.deer[deerIndex].hitbox().get_height())))
-        imgs = (player.hitbox, deer[deerIndex].hitbox())
-        for i in range(2):
-            for j in range(4):
-                if Game.pointIntersectsRect(corners[i][j], (corners[i-1][0][0], corners[i-1][0][1], imgs[i-1].get_width(), imgs[i-1].get_height()) ):
-                    collides = True
-                    break
-        return collides
+#    #unused:
+#    @staticmethod
+#    def carCollidesDeer(carPosition, deerPosition, deerIndex = 0):
+#        #prüfe alle vier Ecken beider Rechtecke, ob sie im jeweils anderen Rechteck drin sind
+#        collides = False
+#        hitbox = hitbox()
+#        corners = ( ((carPosition[0], carPosition[1]), (carPosition[0]+Game.instance.player.hitbox.get_width(), carPosition[1]), (carPosition[0]+Game.instance.player.hitbox.get_width(), carPosition[1]+Game.instance.player.hitbox.get_height()), (carPosition[0], carPosition[1]+Game.instance.player.hitbox.get_height())),
+#                ((deerPosition[0], deerPosition[1]), (deerPosition[0]+Game.instance.deer[deerIndex].hitbox.get_width(), deerPosition[1]), (deerPosition[0]+Game.instance.deer[deerIndex].hitbox.get_width(), deerPosition[1]+Game.instance.deer[deerIndex].hitbox.get_height()), (deerPosition[0], deerPosition[1]+Game.instance.deer[deerIndex].hitbox.get_height())))
+#        imgs = (player.hitbox, deer[deerIndex].hitbox)
+#        for i in range(2):
+#            for j in range(4):
+#                if Game.pointIntersectsRect(corners[i][j], (corners[i-1][0][0], corners[i-1][0][1], imgs[i-1].get_width(), imgs[i-1].get_height()) ):
+#                    collides = True
+#                    break
+#        return collides
     
-    #unused:
-    @staticmethod
-    def pointIntersectsRect(point, *corners):
-        return point[0] >= corners[0] and point[0] <= (corners[0]+corners[2]) and point[1] >= corners[1] and point[1] <= (corners[1]+corners[3])
+#    #unused:
+#    @staticmethod
+#    def pointIntersectsRect(point, *corners):
+#        return point[0] >= corners[0] and point[0] <= (corners[0]+corners[2]) and point[1] >= corners[1] and point[1] <= (corners[1]+corners[3])
 #--
 #SETTER & GETTER:
     #Road Adjustment
     def set_street_img(self, path):
         img = pygame.image.load(path)
         img = img.convert()
-        self.street_img = img
+        self.screen_img = img
 
         self.scaled_street = self.scale_street_img()
 
     def scale_street_img(self):
-        width = self.street_img.get_width()
-        height = self.street_img.get_height()
+        width = self.screen_img.get_width()
+        height = self.screen_img.get_height()
         scale = height // self.height #self.height // height
-        img = pygame.transform.scale(self.street_img,
+        img = pygame.transform.scale(Game.instance.screen_img,
                 (width // scale, self.height)) #scale * width
         return img
 
@@ -531,89 +543,90 @@ class Game(object):
         return surf
 
     #player presentation
-    def set_player_img(self, path):
+    def set_player_img(path):
         img = pygame.image.load(path)
         img = img.convert_alpha()
         scale = img.get_height() / (self.height / 5.0)
-        img = pygame.transform.scale(img, (int(round(img.get_width() / scale)),
-            int(round(img.get_height() / scale))))
-        self.player.set_img(img)
+        img = pygame.transform.scale(img, (int(round(img.get_width() / scale)), int(round(img.get_height() / scale))))
+        self.player_img = img
 
-    def set_deer_img(self, paths):
+    #obstacle presentation
+    def set_deer_img(paths):
         imgs = [pygame.image.load(path).convert_alpha() for path in paths]
         scale = imgs[0].get_height() / (self.height / 5.0)
         imgs = [pygame.transform.scale(img, (int(round(img.get_width() / scale)), int(round(img.get_height() / scale)))) for img in imgs]
         self.deer_imgs = imgs
-        for deer in self.deer:
-            deer.set_imgs(imgs)
 
     def spawn_deer(self):
         if randint(0, 1):
-        # Laters
-        #if self.speed < 20:
-        #move_type = randint(0, 2)
-        #elif self.speed < 30:
-        #move_type = randint(0, 4)
-        #else:
-        #move_type = randint(0, 7)
-        self.deer.append(Deer(0, self.width, randint(0, self.height - self.deer_imgs[0].get_height()), self.scaled_street.get_rect(), self.speed))
-        self.deer[-1].set_imgs(self.deer_imgs)
+            move_type = 0
+            if self.game_speed < 20:
+                move_type = randint(0, 2)
+            elif self.game_speed < 30:
+                move_type = randint(0, 4)
+            else:
+                move_type = randint(0, 7)
+            self.deer.append(Deer(move_type, self.width, randint(0, self.height - self.deer_imgs[0].get_height()), self.scaled_street.get_rect(), self.game_speed))
+            self.deer[-1].set_imgs(self.deer_imgs)
 #---
 
     #core function
-    #RECHECK
     def run(self):
-#Christoph:
         renderControls = False
-        #pos = 0 #is already included in the function before display.flip(), see below
+        intro = True
+        #pos = 0 #it's easier to use an instance variable because I want to use it in dispatched functions
         tick = 0
         spawnCount = 0 #number of spawned deer
         maximumCount = 4 #more than 4 deer aren't allowed on the road
-#--
+        maximumSpeed = 50
         self.running = True
         while self.running:
-            self.clock.tick(30)
-            tick += 1
+            self.clock.tick(Game.second)
+            #tick fits rather in the active gameplay section
             
             #PREPARE USER INPUT
             for ev in pygame.event.get():
                 if ev.type == pygame.QUIT:
                     sys.exit()
             keys = pygame.key.get_pressed()
-#Christoph:
+
+            #MODES
             if self.startmenu:
                 if renderControls:
                     #USER input
-                    if keys[pygame.K_RIGHT]:
-                        renderControls = False
-                        self.renderControls()
+                    if not len(keys) == 0:
+                        self.renderControls = False
+                    else: self.renderControls()
                 else:
                     #USER input
-                    if keys[pygame.K_SPACE]: renderControls = True
+                    if keys[pygame.K_SPACE]: self.renderControls = True
+                    elif keys[pygame.K_ESCAPE]:
+                        self.running = False
+                        break
                     elif not len(keys) == 0:
-                        renderControls = False
-                        self.resetGameScene()
-                        self.createStartMenuFrame()
+                        self.resetGameScene() #sets self.startmenu = False
+                    else: self.createStartMenuFrame()
             
             elif self.gameOver:
-                # #USER input
-                if keys[pygame.K_RIGHT]:
+                #USER input
+                if not len(keys) == 0:
                     if keys[pygame.K_ESCAPE]: startmenu = True
-                    else: self.resetGameScene()
-                
-                ##New (4.11.):
-                self.createGameOverFrame()
+                    else: self.resetGameScene() #sets self.gameOver = False
+                else: self.createGameOverFrame()
             
             elif self.pause:
-                # #USER input
+                #USER input
                 if not len(keys) == 0:
-                
-                self.createPauseFrame()
-            
+                    if keys[pygame.K_ESCAPE]:
+                        self.running = False
+                        break
+                    else: self.pause = False
+                else: self.createPauseFrame()
+
             else:
-#--
-                ##USER INPUT:
-    
+                tick += 1
+                
+                #USER INPUT:
                 if keys[pygame.K_RIGHT]:
                     Game.instance.player.accelerate()
                 else:
@@ -624,59 +637,56 @@ class Game(object):
                     Game.instance.player.up()
                 if keys[pygame.K_DOWN]:
                     Game.instance.player.down()
-#Christoph:
                 if keys[pygame.K_SPACE]:
                     Game.instance.player.boost = True # self.boost ist schon in accelerate() und decelerate() eingebaut
                 else: Game.instance.player.boost = False # WICHTIG
-#--
                 if keys[pygame.K_ESCAPE]:
                     pause = True #fänd ich gut, vielleicht kann man dann von dort beenden
-#Christoph:
-                #while (spawn-condition): spawnCount+=1
-                    # if spawnCount:
-                    #   for i in range(spawnCount):
-                    #       spawnedDeer.add(Deer(...))
-                    #   spawnCount = 0
-                    
-                #GAME routine
-                #self.gameOver = Game.instance.player.hasCrashed()
-                for deer in Game.instance.deer:
-                    deer.move()
-                    if deer.isAway():
-                        Game.instance.deer.remove(deer)
-                        self.survivedDeer += 1
-#--
-                if tick % 90 == 0:
-                    if self.next_deer_max > 30:
-                        self.next_deer_max -= 1
-                    if self.next_deer_min > 15:
-                        self.next_deer_min -= 1
-                if tick % 75 == 0 and self.speed < 50:
-                    self.speed += 1
-                    for deer in self.deer:
-                        deer.game_speed = self.speed
-                        self.player.game_speed = self.speed
 
-                if self.next_deer == 0:
+                #GAME routine
+                if tick % (Game.second*2) == 0:
+                    if self.next_deer_max > Game.second*2:
+                        self.next_deer_max -= 1
+                    if self.next_deer_min > Game.second/4:
+                        self.next_deer_min -= 1
+                if tick % int(Game.second*2.5) == 0 and self.game_speed < self.maximumSpeed:
+                    self.game_speed += 1
+                    #for deer in self.deer: #we don't need it anymore
+                        #deer.game_speed = self.game_speed
+                        #self.player.game_speed = self.game_speed
+                
+                #SPAWN
+                if self.next_deer == 0 and spawnCount < maximumCount:
                     self.spawn_deer()
+                    spawnCount += 1
                     self.next_deer = randint(self.next_deer_min, self.next_deer_max)
                 else:
                     self.next_deer -= 1
-
-                for deer in self.deer:
-                    deer.move()
                 
-            ##SETUP IMAGE BUFFER
-            self.createFrame()
-            #pygame.draw.polygon(self.screen, (120, 120, 120), self.street)
+                #self.gameOver = Game.instance.player.hasCrashed()
+                self.gameOver = self.player.hitbox.collidelist(self.deer)
+                for i in range(len(Game.instance.deer)):
+                    deer = Game.instance.deer[i]
+                    deer.move()
+                    if deer.isAway():
+                        Game.instance.deer.remove(i)
+                        self.survivedDeer += 1
+                        spawnCount -= 1
+                
+                #SETUP IMAGE BUFFER
+                self.createFrame()
 
-            ##SHOW CONTENT
+            #SHOW CONTENT
             pygame.display.flip()
+
+        if not self.restart:
+            #FINISH IT!
+            sys.exit()
+        else: self.restart = False
 
 if __name__ == "__main__":
     #game = Game() #we don't need it anymore
-    #Game.instance.set_player_img(os.path.join("img", "voiture_r2.png"))
-    #Game.instance.set_street_img(os.path.join("img", "rue_n_clip.png"))
-    game.set_player_img(os.path.join("img", "voiture_r2.png"))
-    game.set_deer_img([os.path.join("img", "chevreuil_m_gif%i.png" % i) for i in [1, 2, 3, 2]])
-    Game.instance.run()
+    Game.instance.set_player_img(os.path.join("img", "voiture_r2.png"))
+    Game.instance.set_deer_img([os.path.join("img", "chevreuil_m_gif%i.png" % i) for i in (1, 2, 3, 2)])
+    while True: #will leave run() and execute it again, if self.restart == True
+        Game.instance.run()
