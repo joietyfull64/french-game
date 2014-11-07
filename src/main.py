@@ -677,4 +677,6 @@ if __name__ == "__main__":
     #game = Game() #we don't need it anymore
     #Game.instance.set_player_img(os.path.join("img", "voiture_r2.png"))
     #Game.instance.set_street_img(os.path.join("img", "rue_n_clip.png"))
+    game.set_player_img(os.path.join("img", "voiture_r2.png"))
+    game.set_deer_img([os.path.join("img", "chevreuil_m_gif%i.png" % i) for i in [1, 2, 3, 2]])
     Game.instance.run()
