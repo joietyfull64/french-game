@@ -5,6 +5,10 @@ import os.path
 import sys
 from math import ceil
 
+#TODO:   - load pictures and createFrame methods
+#        - display method for Deer
+#        - angles of deer images in Deer() [recheck it!] and animation components in spawn_deer()
+
 import pygame
 
 #we don't need Entity anymore, it would only hold two variables:
@@ -180,6 +184,7 @@ class Deer(object):
         self.img = -1 #animation index, -1 weil wir vor jedem Anzeigen zuerst diese Variable erhöhen
         self.imgs = imgs #animation
 #Christoph:
+        self.angle = 0 # the angle after which the, by default vertical, image is rotated counterclockwise
         self.x = x
         self.y = y
         self.speed_x = 0 #we need it for movment_type 8 & 9
@@ -229,45 +234,62 @@ class Deer(object):
 #        else:
 #            self.position = (screen.width, random((screen.height/2-max_y/2), (screen.height/2+max_y/2)))
 
-        #starting positions of the move_types
+        #starting positions of the move_types and picture angle calculations
         g = Game.instance
+        self.angle = 90
         if self.move_type == 2:
             self.x = g.screen.width
             self.y = randint(g.screen.height/2, g.screen.height+g.bounds[1]-self.longestImgHeight))
+            self.angle -= tan(g.game_speed / g.vertical_deer_speed)
         elif self.move_type == 3:
             self.x = g.screen.width
             self.y = randint(g.bounds[0], g.screen/2-self.longestImgHeight)
+            self.angle += tan(g.game_speed / g.vertical_deer_speed)
         elif self.move_type == 4:
             self.x = g.screen.width
             self.y = randint(g.player.y,g.screen.height-self.longestImgheight+g.bounds[1])
             hitbox = self.hitbox()
-            self.speed_y = ((g.player.y+g.player.hitbox.height/2)-(self.y+hitbox.height/2))/((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))*g.game_speed
+            self.speed_y = ((self.x+hitbox.height/2)-(g.player.x+g.player.hitbox.height/2))/abs((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))*g.game_speed
+            self.angle -= tan(g.game_speed / self.speed_y)
         elif self.move_type == 5:
             self.x = g.screen.width
             self.y = randint(g.bounds[0], g.player.y+g.player.height-self.longestImgHeight)
             hitbox = self.hitbox()
-            self.speed_y = ((g.player.y+g.player.hitbox.height/2)-(self.y+hitbox.height/2))/((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))*g.game_speed
-        elif self.move_type == 6 or self.move_type == 8:
+            self.speed_y = ((self.x+hitbox.height/2)-(g.player.x+g.player.hitbox.height/2))/abs((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))*g.game_speed
+            self.angle += tan(g.game_speed / self.speed_y)
+        elif self.move_type == 6:
             self.x = randint(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
             self.y = -imgs[0].height
+            self.angle = 0
         elif self.move_type == 8:
             self.x = randint(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
             self.y = -imgs[0].height
             hitbox = self.hitbox()
-            self.speed_x = ((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))/((g.player.y+g.player.hitbox.height/2)-(self.y+hitbox.height/2))*g.screen.height/120
-        elif self.move_type == 7 or self.move_type == 9:
+            self.speed_x = ((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))/abs((g.player.y+g.player.hitbox.height/2)-(self.y+hitbox.height/2))*(g.screen.height/120)
+            self.angle = ((self.speed_x >>> 31)|1)*tan(g.vertical_deer_speed / self.speed_x)
+        elif self.move_type == 7:
             self.x = randint(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
             self.y = g.screen.height
+            self.angle = 180
         elif self.move_type == 9:
             self.x = randint(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
             self.y = g.screen.height
             hitbox = self.hitbox()
-            self.speed_x = ((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))/((g.player.y+g.player.hitbox.height/2)-(self.y+hitbox.height/2))*g.screen.height/120
+            self.speed_x = ((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))/abs((g.player.y+g.player.hitbox.height/2)-(self.y+hitbox.height/2))*(g.screen.height/120)
+            self.angle = 180 - ((self.speed_x >>> 31)|1)*tan(g.vertical_deer_speed / self.speed_x)
         else: #0 & 1 & 10 & 11
-            if self.move_type == 10: self.speed_y = -g.vertical_deer_speed
-            elif self.move_type == 11: self.speed_y = g.vertical_deer_speed
+            self.angle = 90
+            gs = g.game_speed/2
+            if self.move_type == 10:
+                self.speed_y -= g.vertical_deer_speed
+                self.angle -= tan(gs / g.vertical_deer_speed))
+            elif self.move_type == 11:
+                self.speed_y = g.vertical_deer_speed
+                self.angle += tan(gs / g.vertical_deer_speed))
             self.x = g.screen.width
             self.y = randint(g.bounds[0], g.screen.height-self.longestImgHeight+g.bounds[1])
+        if not self.angle == 0 and not Game.playAsEmail: self.imgs = [pygame.transform.rotate(img, self.angle))) for img in self.imgs]
+        else: self.angle = 0
 
     def hitbox(self):
         """Returns the current hitbox for the current image"""
@@ -350,6 +372,7 @@ class Deer(object):
             self.x += g.game_speed/2
             if (self.speed_y < 0 and self.y <= g.bounds[0]) or (self.speed_y > 0 and self.y >= g.screen.height-g.bounds[1]-self.hitbox().height):
                 self.speed_y *= -1
+                self.imgs = [pygame.transform.rotate(img, ((self.speed_y >>> 31) | 1)*(90-self.angle)*2) for img in self.imgs]
             else:
                 self.y += self.speed_y
         else: # 0 & others
@@ -378,11 +401,21 @@ class Deer(object):
 
     def next_img(self):
         """Returns the next image in the animation"""
-        if self.img >= len(self.imgs)-1:
-            self.img = 0
+        if not Game.playAsEmail:
+            self.img = 0 if self.img >= len(self.imgs)-1 else self.img+1
+            return self.imgs[self.img]
         else:
-            self.img += 1
-        return self.imgs[self.img]
+            #possibility 1 (easy):
+            if randint(0,1): return Game.instance.logo_imgs[randint(0,3)]
+            else: return Game.instance.instance.virus_imgs[randint(0,3)]
+            #possibility 2 ():
+            index = randint(0,3)
+            logo = Game.instance.logo_imgs[index]
+            virus = Game.instance.virus_imgs[index]
+            width = virus.get_width()
+            img = pygame.transform.flip[logo, False, True].move(width-self.img,0)
+            self.img += 3 #for 30 fps
+            self.img %= 2*width
 
     def render(self, surface):
         #habe next_img() gleich hier benutzt
@@ -402,6 +435,7 @@ class Game(object):
     # is needed to call instance variables with other classes' methods
     instance = Game()
     second = 30
+    playAsEmail = True
 #--
     def __init__(self, width=1200, height=400):
         """
@@ -448,6 +482,7 @@ class Game(object):
 #        self.screen = pygame.display.set_mode((self.width, self.height))
         
     def resetGameScene(self):
+        """Resets all options and restarts the game."""
         #Game.instance = Game() #this only works, if this method and run() are staticmethods; begins always with startmenu
         self.player = Player(self.bounds[2], self.height//2, self.player_img)
         self.deer = []
@@ -464,29 +499,35 @@ class Game(object):
         #self.clock = pygame.time.Clock()
     
     def createFrame(self, surface):
+        """Draws onto the given Surface object."""
         #draw background
+        surface.fill(pygame.Color(0,0,0,255))
         self.pos += self.game_speed
         self.pos %= self.scaled_street.get_width()
-        self.screen.blit(self.get_street_img(self.pos), (0, 0))
+        surface.blit(self.get_street_img(self.pos), (0, 0))
         #draw player
-        self.player.render(self.screen)
+        self.player.render(surface)
         #draw deer
         for deer in self.deer:
             deer.render(self.screen)
         #draw stats (score, time (with tenth seconds))
     
-    def createPauseFrame(self):
-        self.createFrame()
-        # draw and write something on the screen
+    def createPauseFrame(self, surface):
+        """Displays the pause menu on the given Surface object."""
+        self.createFrame(surface)
     
-    def createGameOverFrame(self):
-        # draw and write something on the screen
+    def createGameOverFrame(self, surface):
+        """Draws the Game Over screen on the given Surface object."""
+        surface.fill(pygame.Color(0,0,0,255))
     
-    def createStartMenuFrame(self):
-        # draw and write something on the screen
+    def createStartMenuFrame(self, surface):
+        """Paints the starting screen on the Surface object."""
+        surface.fill(pygame.Color(0,0,0,255))
     
     def renderControls(self, surface):
-        # draw and write something on the screen
+        """Displays controls on a start menu of a Surface object."""
+        createStartMenuFrame(surface)
+        
     
 #    #unused:
 #    def screenShrinks(self): #a funny idea, when playing -> the game window shrinks per 150 frames by 1 pixel for more difficulty
@@ -521,41 +562,71 @@ class Game(object):
 #--
 #SETTER & GETTER:
     #Road Adjustment
-    def set_street_img(self, path):
-        img = pygame.image.load(path)
-        img = img.convert()
-        self.screen_img = img
+    def set_street_img(self, path, path2 = None):
+        if not path2: path2 = path
+        img = pygame.image.load(path).convert()
+        img2 = pygame.image.load(path2).convert()
+        #self.street_img # we don't need it anymore
+        self.scaled_street = self.scale_street_img(img)
+        self.scaled_street2 = self.scale_street_img(img2)
 
-        self.scaled_street = self.scale_street_img()
-
-    def scale_street_img(self):
-        width = self.screen_img.get_width()
-        height = self.screen_img.get_height()
+    def scale_street_img(self, street_img):
+        width = street_img.get_width()
+        height = street_img.get_height()
         scale = height // self.height #self.height // height
-        img = pygame.transform.scale(Game.instance.screen_img,
-                (width // scale, self.height)) #scale * width
+        img = pygame.transform.scale(street_img, (width // scale, self.height)) #scale * width
         return img
 
-    def get_street_img(self, offset): 
+    def get_street_img(self, offset, matrixStyle = True): 
         surf = pygame.Surface((self.width, self.height))
-        for x in range(-offset, self.width, self.scaled_street.get_width()):
-            surf.blit(self.scaled_street, (x, 0))
+        street = self.scaled_street if not matrixStyle else self.scaled_street2
+        for x in range(-offset, self.width, street.get_width()):
+            surf.blit(street, (x, 0))
         return surf
 
     #player presentation
     def set_player_img(path):
-        img = pygame.image.load(path)
-        img = img.convert_alpha()
-        scale = img.get_height() / (self.height / 5.0)
-        img = pygame.transform.scale(img, (int(round(img.get_width() / scale)), int(round(img.get_height() / scale))))
-        self.player_img = img
+        img = pygame.image.load(path).convert_alpha()
+        width = self.scale(img, self.height / 5.0)
+        self.player_img = pygame.transform.scale(img, width, int(self.height/5.0))
 
     #obstacle presentation
     def set_deer_img(paths):
         imgs = [pygame.image.load(path).convert_alpha() for path in paths]
-        scale = imgs[0].get_height() / (self.height / 5.0)
-        imgs = [pygame.transform.scale(img, (int(round(img.get_width() / scale)), int(round(img.get_height() / scale)))) for img in imgs]
-        self.deer_imgs = imgs
+        width = self.scale(imgs[0], self.height / 5.0)
+        self.deer_imgs = [pygame.transform.scale(img, width, int(self.height/5.0)) for img in imgs]
+    
+    def set_secret_service_imgs(keys, logoPathes, virusPathes):
+        """Arg0 = key names for the images from both path lists
+           Arg1 = the list of pathes for the secret service images
+           Arg2 = the list of pathes for the virus images"""
+        logoImgs = dict(zip(keys, [pygame.image.load(path).convert_alpha() for path in logoPathes]))
+        width = self.scale(logoImg.itervalues(), self.height/5.0)
+        self.logo_imgs = [pygame.transform.scale(logoImgs.itervalues()[i], width[i], int(self.height/5.0)) for i in range(len(logoImgs))]
+        virusImgs = dict(zip(keys, [pygame.image.load(path).convert_alpha() for path in virusPathes]))
+        width = self.scale(virusImgs.itervalues(), self.height/5.0)
+        self.virus_imgs = [pygame.transform.scale(virusImgs.itervalues()[i], width[i], int(self.height/5.0)) for i in range(len(virusImgs))]
+    
+    #other graphical presentation
+    def scale(self, imgs, relHeight = self.height):
+        """Takes one or multiple images and one or multiple target heights and returns the corresponding width(s) and the scale factor."""
+        if len(imgs) > 1:
+            if len(relHeight) <= 1:
+                scale = [relHeight / img.get_height() for img in imgs]
+                return [int(round(img.get_width() * scale) for img in imgs], scale
+            else:
+                lst = imgs if not len(imgs) > len(relHeight) else relHeight
+                scale = [relHeight[i] / img[i].get_height() for i in range(len(lst))]
+                return [int(round(imgs[i].get_width() * scale[i]) for i in range(len(lst))], scale
+        else:
+            if len(relHeight) > 1: relHeight = relHeight[0]
+            scale = relHeight / imgs.get_height()
+            return int(round(imgs.get_width() * scale)), scale
+    
+    def set_images(heights, *paths):
+        imgs = dict(zip(paths, [pygame.image.load(path).convert_alpha() for path in paths]))
+        widths = self.scale(imgs.itervalues(), heights)
+        self.graphics = [pygame.transform.scale(imgs.itervalues()[i], widths[i], heights[i]) for i in range(len(imgs))]
 
     def spawn_deer(self):
         if randint(0, 1):
@@ -565,8 +636,15 @@ class Game(object):
             elif self.game_speed < 30:
                 move_type = randint(0, 4)
             else:
-                move_type = randint(0, 7)
-            self.deer.append(Deer(move_type, self.width, randint(0, self.height - self.deer_imgs[0].get_height()), self.scaled_street.get_rect(), self.game_speed))
+                move_type = randint(0, 11)
+            if randint(0,1): return Game.instance.logo_imgs[randint(0,3)]
+            else: return Game.instance.instance.virus_imgs[randint(0,3)]
+            #possibility 2 ():
+            index = randint(0,3)
+            imgs = self.deer_imgs[0]
+            if move_type == 1:
+                imgs = self.deer_imgs
+            self.deer.append(Deer(move_type, imgs))
             self.deer[-1].set_imgs(self.deer_imgs)
 #---
 
@@ -579,6 +657,7 @@ class Game(object):
         spawnCount = 0 #number of spawned deer
         maximumCount = 4 #more than 4 deer aren't allowed on the road
         maximumSpeed = 50
+        newGame = True
         self.running = True
         while self.running:
             self.clock.tick(Game.second)
@@ -596,7 +675,7 @@ class Game(object):
                     #USER input
                     if not len(keys) == 0:
                         self.renderControls = False
-                    else: self.renderControls()
+                    else: self.renderControls(self.screen)
                 else:
                     #USER input
                     if keys[pygame.K_SPACE]: self.renderControls = True
@@ -605,14 +684,14 @@ class Game(object):
                         break
                     elif not len(keys) == 0:
                         self.resetGameScene() #sets self.startmenu = False
-                    else: self.createStartMenuFrame()
+                    else: self.createStartMenuFrame(self.screen)
             
             elif self.gameOver:
                 #USER input
                 if not len(keys) == 0:
                     if keys[pygame.K_ESCAPE]: startmenu = True
                     else: self.resetGameScene() #sets self.gameOver = False
-                else: self.createGameOverFrame()
+                else: self.createGameOverFrame(self.screen)
             
             elif self.pause:
                 #USER input
@@ -621,60 +700,66 @@ class Game(object):
                         self.running = False
                         break
                     else: self.pause = False
-                else: self.createPauseFrame()
+                else: self.createPauseFrame(self.screen)
 
             else:
-                tick += 1
-                
-                #USER INPUT:
-                if keys[pygame.K_RIGHT]:
-                    Game.instance.player.accelerate()
-                else:
-                    Game.instance.player.decelerate()
-                if keys[pygame.K_LEFT]: #brake
-                    Game.instance.player.decelerate()
-                if keys[pygame.K_UP]:
-                    Game.instance.player.up()
-                if keys[pygame.K_DOWN]:
-                    Game.instance.player.down()
-                if keys[pygame.K_SPACE]:
-                    Game.instance.player.boost = True # self.boost ist schon in accelerate() und decelerate() eingebaut
-                else: Game.instance.player.boost = False # WICHTIG
-                if keys[pygame.K_ESCAPE]:
-                    pause = True #fänd ich gut, vielleicht kann man dann von dort beenden
+                if not newGame:
+                    tick += 1
+                    #USER INPUT:
+                    if keys[pygame.K_RIGHT]:
+                        Game.instance.player.accelerate()
+                    else:
+                        Game.instance.player.decelerate()
+                    if keys[pygame.K_LEFT]: #brake
+                        Game.instance.player.decelerate()
+                    if keys[pygame.K_UP]:
+                        Game.instance.player.up()
+                    if keys[pygame.K_DOWN]:
+                        Game.instance.player.down()
+                    if keys[pygame.K_SPACE]:
+                        Game.instance.player.boost = True # self.boost ist schon in accelerate() und decelerate() eingebaut
+                    else: Game.instance.player.boost = False # WICHTIG
+                    if keys[pygame.K_ESCAPE]:
+                        pause = True #fänd ich gut, vielleicht kann man dann von dort beenden
 
-                #GAME routine
-                if tick % (Game.second*2) == 0:
-                    if self.next_deer_max > Game.second*2:
-                        self.next_deer_max -= 1
-                    if self.next_deer_min > Game.second/4:
-                        self.next_deer_min -= 1
-                if tick % int(Game.second*2.5) == 0 and self.game_speed < self.maximumSpeed:
-                    self.game_speed += 1
-                    #for deer in self.deer: #we don't need it anymore
-                        #deer.game_speed = self.game_speed
-                        #self.player.game_speed = self.game_speed
+                    #GAME routine
+                    if tick % (Game.second*2) == 0:
+                        if self.next_deer_max > Game.second*2:
+                            self.next_deer_max -= 1
+                        if self.next_deer_min > Game.second/4:
+                            self.next_deer_min -= 1
+                    if tick % int(Game.second*2.5) == 0 and self.game_speed < self.maximumSpeed:
+                        self.game_speed += 1
+                        #for deer in self.deer: #we don't need it anymore
+                            #deer.game_speed = self.game_speed
+                            #self.player.game_speed = self.game_speed
                 
-                #SPAWN
-                if self.next_deer == 0 and spawnCount < maximumCount:
-                    self.spawn_deer()
-                    spawnCount += 1
-                    self.next_deer = randint(self.next_deer_min, self.next_deer_max)
+                    #SPAWN
+                    if self.next_deer == 0 and spawnCount < maximumCount:
+                        self.spawn_deer()
+                        spawnCount += 1
+                        self.next_deer = randint(self.next_deer_min, self.next_deer_max)
+                    else:
+                        self.next_deer -= 1
+                
+                    #self.gameOver = Game.instance.player.hasCrashed()
+                    self.gameOver = self.player.hitbox.collidelist(self.deer)
+                    for i in range(len(Game.instance.deer)):
+                        deer = Game.instance.deer[i]
+                        deer.move()
+                        if deer.isAway():
+                            Game.instance.deer.remove(i)
+                            self.survivedDeer += 1
+                            spawnCount -= 1
+                
+                #INTRO
                 else:
-                    self.next_deer -= 1
-                
-                #self.gameOver = Game.instance.player.hasCrashed()
-                self.gameOver = self.player.hitbox.collidelist(self.deer)
-                for i in range(len(Game.instance.deer)):
-                    deer = Game.instance.deer[i]
-                    deer.move()
-                    if deer.isAway():
-                        Game.instance.deer.remove(i)
-                        self.survivedDeer += 1
-                        spawnCount -= 1
+                    #add something to the screen
+                    if tick % (Game.second*2) == 0:
+                        newGame = False
                 
                 #SETUP IMAGE BUFFER
-                self.createFrame()
+                self.createFrame(self.screen)
 
             #SHOW CONTENT
             pygame.display.flip()
@@ -684,9 +769,17 @@ class Game(object):
             sys.exit()
         else: self.restart = False
 
+    def path(self, path):
+        return os.path.join("img", path)
+
 if __name__ == "__main__":
     #game = Game() #we don't need it anymore
-    Game.instance.set_player_img(os.path.join("img", "voiture_r2.png"))
-    Game.instance.set_deer_img([os.path.join("img", "chevreuil_m_gif%i.png" % i) for i in (1, 2, 3, 2)])
+    Game.instance.set_street_img(self.path("rue_n_clip.png"), self.path("img", "rue_matrix_clip.png"))
+    Game.instance.set_player_img(self.path("img", "voiture_r2.png"))
+    Game.instance.set_deer_img([self.path("img", "chevreuil_m_gif%i.png" % i) for i in (1, 2, 3, 2)])
+    service_colours = ["b", "r", "v", "vi"]
+    service_lexicon = dict(zip(service_colours, ["NSA", "GCHQ", "BND", "DGSE"]))
+    Game.instance.set_secret_service_imgs(service_colours, [self.path("virus_%s" % i) for i in service_colours], [self.path("%s_%s" % (service_lexicon[k], k)) for k in service_lexicon])
+    Game.instance.set_images(self.path([], "allez.png"))
     while True: #will leave run() and execute it again, if self.restart == True
         Game.instance.run()
