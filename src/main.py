@@ -6,8 +6,7 @@ import sys
 from math import ceil
 
 #TODO:   - load pictures and createFrame methods
-#        - display method for Deer
-#        - animation components in spawn_deer()
+#        - create virus animation in next_img()
 
 import pygame
 
@@ -230,7 +229,6 @@ class Deer(object):
             if randint(0,1): return Game.instance.logo_imgs[self.img]
             else: return Game.instance.instance.virus_imgs[self.img]
             #possibility 2 ():
-            index = randint(0,3)
             logo = Game.instance.logo_imgs[self.img]
             virus = Game.instance.virus_imgs[self.img]
             width = virus.get_width()
@@ -427,7 +425,7 @@ class Game(object):
         #I would do it like this:
         n = 23
         mt = randint(0,n)
-        p = [3, 3, 2, 2, 1, 1] #probabilites
+        p = [3, 3, 2, 2, 1, 1] #probabilites, repeated to 12 elements, all elements' sum must be n+1
         for i in range(1,12):
             n -= p[i%len(p)]
             if mt > n:
