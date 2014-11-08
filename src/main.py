@@ -7,29 +7,9 @@ from math import ceil
 
 #TODO:   - load pictures and createFrame methods
 #        - display method for Deer
-#        - angles of deer images in Deer() [recheck it!] and animation components in spawn_deer()
+#        - animation components in spawn_deer()
 
 import pygame
-
-#we don't need Entity anymore, it would only hold two variables:
-#class Entity:
-##moved street and game_speed, see the comment at the end of this constructor
-#    def __init__(self, x, y):
-#        """Initializes the Entity instance. Arguments:
-#        x     = The initial x coordinate of the Entity
-#        y     = The initial y coordinate of the Entity
-#        """
-##Christoph:
-##        self.speed = (0, 0) #beta - pixel speed, will be set individually for derived objects
-##--
-#        self.x = x
-#        self.y = y
-#        #self.position = (x, y) #beta - a compound variable to use for loops
-#        #self.max_x = max_x
-#        #self.max_y = max_y
-#        #self.img = img #ist gleichzeitig die Größe 
-#        #Game.instance.screen = street # brauchen wir nicht, da wir schon self.screen in Game.instance haben
-#        #self.game_speed = game_speed # hab ich in die Klasse Game in eine Klasseninstanz gemacht
 
 class Player(object):
 
@@ -39,100 +19,13 @@ class Player(object):
         y     = The initial y coordinate of the Player
         img   = The player's image
         """
-        #super(Player, self).__init__(x,y)
-#Christoph:
         self.x = x
         self.y = y
         self.set_image(img)
         self.boost = False #mehr dazu: unterer Kommentar
         self.boostFactor = 2.0 #when space is pressed, the movement will be faster by this factor
-
-#    def decelerate(self):
-#        """Decelerates the Player."""
-#        leftBound = screen.width/2-max_x/2
-#        self.speed[0] = -5 * (1 if not self.boost else self.boostFactor)
-#        space = self.position[0] - leftBounds
-#        if space < (self.speed[0] if not self.boost else (self.speed[0]*self.boostFactor)):
-#            self.speed[0] = -space
-#            self.position[0] = leftBounds
-#        else:
-#            self.position[0] += self.speed[0] if not self.boost else (self.speed[0]*self.boostFactor)
-#
-#    def accelerate(self):
-#        """Accelerates the Player."""
-#        rightBound = screenWidth/2+max_x/2
-#        self.speed[0] = 5 * (1 if not self.boost else self.boostFactor)
-#        space = screen.width-rightBound-self.img.get_width()-self.position[0]
-#        if space < (self.speed[0] if not self.boost else (self.speed[0]*self.boostFactor)):
-#            self.speed[0] = space
-#            self.position[0] = screen.width-rightBound-self.img.get_width()
-#        else:
-#            self.position[0] += self.speed[0]
-#
-#    def up(self): #override
-#        upperBound = screen.height/2-max_y/2
-#        self.speed[1] = -5
-#        space = self.position[1] - upperBound
-#        if space < self.speed[1]: #upperBound muss nicht unbedingt 0 sein
-#            self.speed[1] = -space
-#            self.position[1] = upperBound
-#        else:
-#            self.position[1] += self.speed[1]
-#        
-#    def down(self): #override
-#        lowerBound = screen.height/2+max_y/2
-#        self.speed[1] = 5
-#        space = screen.height-lowerBound-self.img.get_height()-self.position[1]
-#        if space < self.speed[1]:
-#            self.speed[1] = space
-#            self.position[1] = screen.height-lowerBound-self.img.get_height()
-#        else:
-#            self.position[1] += self.speed[1]
-#    #unused:
-#    def hasCrashed(self):
-#        interference = False
-#        #the following is the simplest algorithm possibility but it takes a few more time to process
-#        for deer in deer:
-#            objects = (self, deer)
-#            i = 0; i2 = 1
-#            reverse = True
-#            if sqrt(self.speed[0]**2 + self.speed[1]**2) < sqrt(deer.speed[0]**2 + deer.speed[1]**2):
-#                i = 1; i2 = 0
-#                reverse = False
-#            collision1 = (float(objects[i].hitbox.get_width()), float(objects[i].hitbox.get_height())) #1 is for the quicker object
-#            origin1 = (objects[i].hitbox.get_width(), objects[i].hitbox.get_height())
-#            distance1 = (objects[i].speed[0], objects[i].speed[1])
-#            collision2 = (float(objects[i2].hitbox.get_width()), float(objects[i2].hitbox.get_height()))
-#            origin2 = (objects[i2].hitbox.get_width(), objects[i2].hitbox.get_height())
-#            distance2 = (objects[i2].speed[0], objects[i2].speed[1])
-#            objects = None
-#            if abs(distance2[0]) > abs(distance2[1]):
-#                i = 1; i2 = 0
-#            else:
-#                i = 0; i2 = 1
-#            #checks the crash condition for every intermediate position with the pace of one pixel
-#            #for the axis with the biggest distance value
-#            sign = (distance2[i] >>> 31) | 1
-#            speed2 = float(distance2[i2])/float(distance2[i])*sign
-#            speed1 = float(distance1[i])/float(abs(distance2[i])) # 1/kleineEntfernungVomLangsamerenObjekt = Faktor
-#            speed12 = float(distance1[i2])/float(abs(distance2[i]))
-#            n = 1
-#            while n < distance2[i] and not interference:
-#                collision2[i] = origin2[i] + n*sign
-#                collision2[i2] = origin2[i2] + int(n*speed2)
-#                collision1[i] = origin1[i] + int(n*speed1)
-#                collision1[i2] = origin1[i2] + int(n*speed12)
-#                if not reverse:
-#                    interference = Game.carCollidesDeer(collision1, collision2)
-#                else: interference = Game.carCollidesDeer(collision2, collision1)
-#                n += 1
-#
-#        self.speed = (0,0) #because we set the speed each time when calling down(), up(), right(), left(), accelerate() or decelerate()
-#                            #this enables us to infer the used movement function
-#        return interference
-#--
+    
     def up(self):
-#Christoph: added conditional operator with self.boost and changable screen bounds
         """Moves the Player up."""
         if self.hitbox.top > Game.instance.screen.top+self.bounds[0]:
             self.hitbox = self.hitbox.move(0, ((-Game.instance.screen.height / 30) if not self.boost else (-Game.instance.screen.height/30*self.boostFactor)) )
@@ -161,12 +54,10 @@ class Player(object):
         """
         self.img = img
         self.hitbox = self.img.get_rect().move(self.x, self.y)
-
-#Christoph:
+    #Unused
     def get_img(self):
         """Returns: arg0 = self.img, arg1 = self.x, arg2 = self.y"""
         return self.img, self.x, self.y
-#--
 
     def render(self, surface):
         """Blits the Player on 'surface'."""
@@ -179,12 +70,11 @@ class Deer(object):
         move_type = The movement type. See Deer.move().
         imgs = a tuple of images whose elementary images are switched
         """
-        #super(Deer, self).__init__(*args)
         self.move_type = move_type
         self.img = -1 #animation index, -1 weil wir vor jedem Anzeigen zuerst diese Variable erhöhen
-        self.imgs = imgs #animation
-#Christoph:
+        self.imgs = imgs
         self.angle = 0 # the angle after which the, by default vertical, image is rotated counterclockwise
+        
         self.x = x
         self.y = y
         self.speed_x = 0 #we need it for movment_type 8 & 9
@@ -198,65 +88,30 @@ class Deer(object):
                     self.longestImgWidth = i.get_width()
                 if i.get_height() > self.longestImgHeight:
                     self.longestImgHeight = i.get_height()
-        
-         #beta version:
-#        # 0
-#        if move_type == 0:
-#            self.position = (screen.width, random((screen.height/2-max_y/2), (screen.height/2+max_y/2)))
-#        # 1 & 2 & 3 & 4
-#        elif not move_type == 5 and not move_type == 6 and not move_type == 7:
-#            # 1 & 3
-#            if move_type == 1 or move_type == 3:
-#                self.position = (random(screen.width/2-max_x/2, screen.width/2+max_x/2), -self.img.get_height())
-#            # 2 & 4
-#            else:
-#                self.position = (random(screen.width/2-max_x/2, screen.width/2+max_x/2), screen.height)
-#            # 1 & 2
-#            if move_type == 1 or move_type == 2:
-#                self.speed = (0, (10 if move_type == 1 else -10) )
-#            # 3 & 4
-#            else:
-#                #strahlensatz mit pythagoras
-#                deerCenter = (self.position[0]+self.img.get_width()/2, self.position[1]+self.img.get_height()/2)
-#                carCenter = (player.position[0]+player.hitbox.get_width()/2, player.position[1]+player.hitbox.get_height()/2)
-#                xDistance = carCenter[0]-deerCenter[0]; yDistance = carCenter[1]-deerCenter[1]
-#                distance = sqrt(xDistance**2 + yDistance**2)
-#                x = float(xDistance)/float(distance)*10; y = float(yDistance)/float(distance)*10
-#                self.speed = (x,y)
-#        # 5 & 6
-#        elif move_type == 5 or move_type == 6:
-#            self.position = (screen.width, random((screen.height/2-max_y/2), (screen.height/2+max_y/2)))
-#            # 5
-#            if move_type == 5: self.speed = (gameSpeed, -10)
-#            # 6
-#            else: self.speed = (gameSpeed, 10)
-#        # > 6
-#        else:
-#            self.position = (screen.width, random((screen.height/2-max_y/2), (screen.height/2+max_y/2)))
 
-        #starting positions of the move_types and picture angle calculations
+        #start positions of the move_types and picture angle calculations
         g = Game.instance
-        self.angle = 90
+        self.angle = -90
         if self.move_type == 2:
             self.x = g.screen.width
             self.y = randint(g.screen.height/2, g.screen.height+g.bounds[1]-self.longestImgHeight))
-            self.angle -= tan(g.game_speed / g.vertical_deer_speed)
+            self.angle += tan(g.game_speed / g.vertical_deer_speed)
         elif self.move_type == 3:
             self.x = g.screen.width
             self.y = randint(g.bounds[0], g.screen/2-self.longestImgHeight)
-            self.angle += tan(g.game_speed / g.vertical_deer_speed)
+            self.angle -= tan(g.game_speed / g.vertical_deer_speed)
         elif self.move_type == 4:
             self.x = g.screen.width
             self.y = randint(g.player.y,g.screen.height-self.longestImgheight+g.bounds[1])
             hitbox = self.hitbox()
-            self.speed_y = ((g.player.x+g.player.hitbox.height/2)-(self.x+hitbox.height/2))/abs((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))*g.game_speed
-            self.angle -= tan(g.game_speed / self.speed_y)
+            self.speed_y = ((g.player.y+g.player.hitbox.height/2)-(self.y+hitbox.height/2))/((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))*g.game_speed
+            self.angle += tan(g.game_speed / self.speed_y) # self.speed_y is always positive
         elif self.move_type == 5:
             self.x = g.screen.width
             self.y = randint(g.bounds[0], g.player.y+g.player.height-self.longestImgHeight)
             hitbox = self.hitbox()
-            self.speed_y = ((g.player.x+g.player.hitbox.height/2)-(self.x+hitbox.height/2))/abs((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))*g.game_speed
-            self.angle += tan(g.game_speed / self.speed_y)
+            self.speed_y = ((g.player.y+g.player.hitbox.height/2)-(self.y+hitbox.height/2))/((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))*g.game_speed
+            self.angle -= tan(g.game_speed / -self.speed_y)
         elif self.move_type == 6:
             self.x = randint(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
             self.y = -imgs[0].height
@@ -265,8 +120,8 @@ class Deer(object):
             self.x = randint(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
             self.y = -imgs[0].height
             hitbox = self.hitbox()
-            self.speed_x = ((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))/abs((g.player.y+g.player.hitbox.height/2)-(self.y+hitbox.height/2))*(g.screen.height/120)
-            self.angle = -((self.speed_x >>> 31)|1)*tan(g.vertical_deer_speed / self.speed_x)
+            self.speed_x = ((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))/((g.player.y+g.player.hitbox.height/2)-(self.y+hitbox.height/2))*(g.screen.height/120)
+            self.angle = (((self.speed_x >> -1)^-1)|1)*tan(g.vertical_deer_speed / self.speed_x)
         elif self.move_type == 7:
             self.x = randint(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
             self.y = g.screen.height
@@ -275,21 +130,24 @@ class Deer(object):
             self.x = randint(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
             self.y = g.screen.height
             hitbox = self.hitbox()
-            self.speed_x = ((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))/abs((g.player.y+g.player.hitbox.height/2)-(self.y+hitbox.height/2))*(g.screen.height/120)
-            self.angle = 180 + ((self.speed_x >>> 31)|1)*tan(g.vertical_deer_speed / self.speed_x)
+            self.speed_x = ((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))/((g.player.y+g.player.hitbox.height/2)-(self.y+hitbox.height/2))*(g.screen.height/120)
+            self.angle = 180 + ((self.speed_x >> -1)|1)*tan(g.vertical_deer_speed / self.speed_x)
         else: #0 & 1 & 10 & 11
-            self.angle = 90
             gs = g.game_speed/2
             if self.move_type == 10:
-                self.speed_y -= g.vertical_deer_speed
-                self.angle -= tan(gs / g.vertical_deer_speed))
+                self.speed_y = -g.vertical_deer_speed
+                self.angle += tan(gs / self.speed_y))
             elif self.move_type == 11:
                 self.speed_y = g.vertical_deer_speed
-                self.angle += tan(gs / g.vertical_deer_speed))
+                self.angle -= tan(gs / self.speed_y))
+            elif not self.move_type == 1: self.angle = 90
             self.x = g.screen.width
             self.y = randint(g.bounds[0], g.screen.height-self.longestImgHeight+g.bounds[1])
-        if not self.angle == 0 and not Game.playAsEmail: self.imgs = [pygame.transform.rotate(img, self.angle))) for img in self.imgs]
+        if not self.angle == 0 and not Game.playAsEmail: set_angle(self.angle)
         else: self.angle = 0
+    
+    def set_angle(self, value):
+        self.imgs = [pygame.transform.rotate(img, self.angle))) for img in self.imgs]
 
     def hitbox(self):
         """Returns the current hitbox for the current image"""
@@ -311,36 +169,6 @@ class Deer(object):
         10 = moves left and meanwhile up and down
         11 = moves left and meanwhile down and up
         """
-#Christoph:
-         #beta version with self.position and self.speed
-#        # 1 & 2
-#        if move_type == 1 or move_type == 2:
-#            self.position[1] += self.speed[1]
-#        # 3 & 4
-#        elif move_type == 3 or move_type == 4:
-#            for i in range(2):
-#                self.position[i] += self.speed[i]
-#        # 5 & 6
-#        elif move_type == 5 or move_type == 6:
-#            self.position[0] -= Game.gameSpeed
-#            upperBounds = screen.height/2-max_y/2; lowerBounds = screen.height/2+max_y/2
-#            # upper end
-#            if self.speed[1] < 0 and (self.position[1] - upperBounds) < self.speed[1]:
-#                self.position[1] = upperBounds
-#                self.speed[1] *= -1
-#            # lower end
-#            elif self.speed[1] >= 0 and (screen.height-lowerBounds-self.img.get_height()-self.position[1]) < self.speed[1]:
-#                self.position[1] = screen.height-lowerBounds-self.img.get_height()
-#                self.speed[1] *= -1
-#            # between ends
-#            else: self.position[1] += self.speed[1]
-#        # 0
-#        elif move_type == 0:
-#            self.position[0] -= Game.gameSpeed
-#        # > 6
-#        else:
-#            self.position[0] -= Game.gameSpeed/2
-#--
         #position changes for move_types
         g = Game.instance
         #if self.move_type == 0 is at the end of the function
@@ -372,7 +200,9 @@ class Deer(object):
             self.x += g.game_speed/2
             if (self.speed_y < 0 and self.y <= g.bounds[0]) or (self.speed_y > 0 and self.y >= g.screen.height-g.bounds[1]-self.hitbox().height):
                 self.speed_y *= -1
-                self.imgs = [pygame.transform.rotate(img, ((self.speed_y >>> 31) | 1)*(90-self.angle)*2) for img in self.imgs]
+                self.angle -= 90 #if running towards car: = 90 - self.angle
+                self.angle *= 2
+                self.imgs = [pygame.transform.rotate(img, self.angle) for img in self.imgs]
             else:
                 self.y += self.speed_y
         else: # 0 & others
