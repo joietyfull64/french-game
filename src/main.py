@@ -249,13 +249,13 @@ class Deer(object):
             self.x = g.screen.width
             self.y = randint(g.player.y,g.screen.height-self.longestImgheight+g.bounds[1])
             hitbox = self.hitbox()
-            self.speed_y = ((self.x+hitbox.height/2)-(g.player.x+g.player.hitbox.height/2))/abs((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))*g.game_speed
+            self.speed_y = ((g.player.x+g.player.hitbox.height/2)-(self.x+hitbox.height/2))/abs((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))*g.game_speed
             self.angle -= tan(g.game_speed / self.speed_y)
         elif self.move_type == 5:
             self.x = g.screen.width
             self.y = randint(g.bounds[0], g.player.y+g.player.height-self.longestImgHeight)
             hitbox = self.hitbox()
-            self.speed_y = ((self.x+hitbox.height/2)-(g.player.x+g.player.hitbox.height/2))/abs((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))*g.game_speed
+            self.speed_y = ((g.player.x+g.player.hitbox.height/2)-(self.x+hitbox.height/2))/abs((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))*g.game_speed
             self.angle += tan(g.game_speed / self.speed_y)
         elif self.move_type == 6:
             self.x = randint(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
@@ -266,7 +266,7 @@ class Deer(object):
             self.y = -imgs[0].height
             hitbox = self.hitbox()
             self.speed_x = ((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))/abs((g.player.y+g.player.hitbox.height/2)-(self.y+hitbox.height/2))*(g.screen.height/120)
-            self.angle = ((self.speed_x >>> 31)|1)*tan(g.vertical_deer_speed / self.speed_x)
+            self.angle = -((self.speed_x >>> 31)|1)*tan(g.vertical_deer_speed / self.speed_x)
         elif self.move_type == 7:
             self.x = randint(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
             self.y = g.screen.height
@@ -276,7 +276,7 @@ class Deer(object):
             self.y = g.screen.height
             hitbox = self.hitbox()
             self.speed_x = ((g.player.x+g.player.hitbox.width/2)-(self.x+hitbox.width/2))/abs((g.player.y+g.player.hitbox.height/2)-(self.y+hitbox.height/2))*(g.screen.height/120)
-            self.angle = 180 - ((self.speed_x >>> 31)|1)*tan(g.vertical_deer_speed / self.speed_x)
+            self.angle = 180 + ((self.speed_x >>> 31)|1)*tan(g.vertical_deer_speed / self.speed_x)
         else: #0 & 1 & 10 & 11
             self.angle = 90
             gs = g.game_speed/2
