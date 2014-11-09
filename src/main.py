@@ -7,6 +7,8 @@ from math import ceil
 
 #TODO:   - load pictures and createFrame methods
 #        - use real names for used Math function menmonics (sqrt, sin, cos, tan, arcsin, arccos) and the pi constant
+#        - replace all non-existing variable names (for example img.width with img.get_width())
+#        - continue at scale()
 
 import pygame
 
