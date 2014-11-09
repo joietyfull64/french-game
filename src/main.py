@@ -27,25 +27,25 @@ class Player(object):
     def up(self):
         """Moves the Player up."""
         if self.hitbox.top > Game.instance.screen.top+self.bounds[0]:
-            self.hitbox = self.hitbox.move(0, ((-Game.instance.screen.height // 30) if not self.boost else (-Game.instance.screen.height//30*self.boostFactor)) )
+            self.hitbox = self.hitbox.move(0, ((-Game.instance.screen.get_height() // 30) if not self.boost else (-Game.instance.screen.get_height()//30*self.boostFactor)) )
 
     def down(self):
         """Moves the Player down."""
         if self.hitbox.bottom < Game.instance.screen.bottom+self.bounds[1]:
-            self.hitbox = self.hitbox.move(0, ((Game.instance.screen.height // 30) if not self.boost else (Game.instance.screen.height//30*self.boostFactor)) )
+            self.hitbox = self.hitbox.move(0, ((Game.instance.screen.get_height() // 30) if not self.boost else (Game.instance.screen.get_height()//30*self.boostFactor)) )
 
     def accelerate(self):
         """Accelerates the Player."""
         if self.hitbox.right < Game.instance.screen.right+self.bounds[3]:
 #            print "ACC"
-            self.hitbox = self.hitbox.move( ((Game.instance.screen.width // 120) if not self.boost else (Game.instance.screen.width//120*self.boostFactor)), 0)
+            self.hitbox = self.hitbox.move( ((Game.instance.screen.get_width() // 120) if not self.boost else (Game.instance.screen.get_width()//120*self.boostFactor)), 0)
 #        else:
 #            print self.hitbox.right, Game.instance.screen.right
     def decelerate(self):
         """Decelerates the Player."""
         if self.hitbox.left > Game.instance.screen.left+self.bounds[2]:
 #            print "DEC"
-            self.hitbox = self.hitbox.move( ((-Game.instance.screen.width // 120) if not self.boost else (-Game.instance.screen.width//120*self.boostFactor)), 0)
+            self.hitbox = self.hitbox.move( ((-Game.instance.screen.get_width() // 120) if not self.boost else (-Game.instance.screen.get_width()//120*self.boostFactor)), 0)
 
     def set_img(self, img):
         """Sets the image (and hitbox) of the Player. Argument:
@@ -93,42 +93,42 @@ class Deer(object):
         g = Game.instance
         self.angle = -90
         if self.move_type == 2:
-            self.x = g.screen.width
-            self.y = randint(g.screen.height//2, g.screen.height+g.bounds[1]-self.longestImgHeight))
+            self.x = g.screen.get_width()
+            self.y = randint(g.screen.get_height()//2, g.screen.get_height()+g.bounds[1]-self.longestImgHeight))
             self.angle += tan(g.game_speed // g.vertical_deer_speed)
         elif self.move_type == 3:
-            self.x = g.screen.width
+            self.x = g.screen.get_width()
             self.y = randint(g.bounds[0], g.screen//2-self.longestImgHeight)
             self.angle -= tan(g.game_speed // g.vertical_deer_speed)
         elif self.move_type == 4:
-            self.x = g.screen.width
-            self.y = randint(g.player.y,g.screen.height-self.longestImgheight+g.bounds[1])
+            self.x = g.screen.get_width()
+            self.y = randint(g.player.y,g.screen.get_height()-self.longestImgheight+g.bounds[1])
             hitbox = self.hitbox()
             self.speed_y = ((g.player.y+g.player.hitbox.height//2)-(self.y+hitbox.height//2))//((g.player.x+g.player.hitbox.width//2)-(self.x+hitbox.width//2))*g.game_speed
             self.angle += tan(g.game_speed // self.speed_y) # self.speed_y is always positive
         elif self.move_type == 5:
-            self.x = g.screen.width
+            self.x = g.screen.get_width()
             self.y = randint(g.bounds[0], g.player.y+g.player.height-self.longestImgHeight)
             hitbox = self.hitbox()
             self.speed_y = ((g.player.y+g.player.hitbox.height//2)-(self.y+hitbox.height//2))//((g.player.x+g.player.hitbox.width//2)-(self.x+hitbox.width//2))*g.game_speed
             self.angle -= tan(g.game_speed // -self.speed_y)
         elif self.move_type == 6:
-            self.x = randint(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
-            self.y = -imgs[0].height
+            self.x = randint(g.bounds[2], g.screen.get_width()+g.bounds[3]-self.longestImgWidth)
+            self.y = -imgs[0].get_height()
             self.angle = 0
         elif self.move_type == 8:
-            self.x = randint(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
-            self.y = -imgs[0].height
+            self.x = randint(g.bounds[2], g.screen.get_width()+g.bounds[3]-self.longestImgWidth)
+            self.y = -imgs[0].get_height()
             hitbox = self.hitbox()
             self.speed_x = ((g.player.x+g.player.hitbox.width//2)-(self.x+hitbox.width//2))//((g.player.y+g.player.hitbox.height//2)-(self.y+hitbox.height//2))*g.vertical_deer_speed
             self.angle = (((self.speed_x >> -1)^-1)|1)*tan(g.vertical_deer_speed // self.speed_x)
         elif self.move_type == 7:
-            self.x = randint(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
-            self.y = g.screen.height
+            self.x = randint(g.bounds[2], g.screen.get_width()+g.bounds[3]-self.longestImgWidth)
+            self.y = g.screen.get_height()
             self.angle = 180
         elif self.move_type == 9:
-            self.x = randint(g.bounds[2], g.screen.width+g.bounds[3]-self.longestImgWidth)
-            self.y = g.screen.height
+            self.x = randint(g.bounds[2], g.screen.get_width()+g.bounds[3]-self.longestImgWidth)
+            self.y = g.screen.get_height()
             hitbox = self.hitbox()
             self.speed_x = ((g.player.x+g.player.hitbox.width//2)-(self.x+hitbox.width//2))//((g.player.y+g.player.hitbox.height//2)-(self.y+hitbox.height//2))*g.vertical_deer_speed
             self.angle = 180 + ((self.speed_x >> -1)|1)*tan(g.vertical_deer_speed // self.speed_x)
@@ -141,8 +141,8 @@ class Deer(object):
                 self.speed_y = g.vertical_deer_speed
                 self.angle -= tan(gs // self.speed_y))
             elif not self.move_type == 1: self.angle = 90
-            self.x = g.screen.width
-            self.y = randint(g.bounds[0], g.screen.height-self.longestImgHeight+g.bounds[1])
+            self.x = g.screen.get_width()
+            self.y = randint(g.bounds[0], g.screen.get_height()-self.longestImgHeight+g.bounds[1])
 
     def hitbox(self):
         """Returns the current hitbox for the current image"""
@@ -195,7 +195,7 @@ class Deer(object):
             self.y += g.vertical_deer_speed
         elif self.move_type == 10 or self.move_type == 11:
             self.x += g.game_speed//2
-            if (self.speed_y < 0 and self.y <= g.bounds[0]) or (self.speed_y > 0 and self.y >= g.screen.height-g.bounds[1]-self.hitbox().height):
+            if (self.speed_y < 0 and self.y <= g.bounds[0]) or (self.speed_y > 0 and self.y >= g.screen.get_height()-g.bounds[1]-self.hitbox().height):
                 self.speed_y *= -1
                 self.angle -= 90 #if running towards car: = 90 - self.angle
                 self.angle *= 2
@@ -287,7 +287,7 @@ class Deer(object):
         surface.blit(self.next_img(), self.hitbox())
 
     def isAway(self):
-        return self.x < -self.longestImgWidth or self.x > Game.instance.screen.width or self.y < -self.longestImgHeight or self.y > Game.instance.screen.height
+        return self.x < -self.longestImgWidth or self.x > Game.instance.screen.get_width() or self.y < -self.longestImgHeight or self.y > Game.instance.screen.get_height()
 
 class Game(object):
     """Weitere optionale Ideen zum Einbauen:
@@ -447,17 +447,19 @@ class Game(object):
     def scale(self, imgs, relHeight = self.height):
         """Takes one or multiple images and one or multiple target heights and returns the corresponding width(s) and the scale factor."""
         if len(imgs) > 1:
-            if len(relHeight) <= 1:
+            if not len(relHeight) > 1:
                 scale = [relHeight // img.get_height() for img in imgs]
-                return [int(round(img.get_width() * scale) for img in imgs], scale
+                widths = [int(round(img.get_width() * scale) for img in imgs]
             else:
                 lst = imgs if not len(imgs) > len(relHeight) else relHeight
                 scale = [relHeight[i] // img[i].get_height() for i in range(len(lst))]
-                return [int(round(imgs[i].get_width() * scale[i]) for i in range(len(lst))], scale
+                widths = [int(round(imgs[i].get_width() * scale[i]) for i in range(len(lst))]
+                return pygame.transform.scale(imgs, ), widths
         else:
             if len(relHeight) > 1: relHeight = relHeight[0]
             scale = relHeight // imgs.get_height()
-            return int(round(imgs.get_width() * scale)), scale
+            width = int(round(imgs.get_width() * scale))
+            return pygame.transform.scale(img, (width, relHeight)), width
     
     def set_images(heights, *paths):
         imgs = dict(zip(paths, [pygame.image.load(path).convert_alpha() for path in paths]))
