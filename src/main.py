@@ -22,8 +22,8 @@ class Player:
         """
         self.x = x
         self.y = y
-        self.speed_x = Game.instance.height()//Game.second
-        self.speed_y = (Game.instance.width() // 2)//Game.second #I made it double as fast as before
+        self.speed_y = Game.instance.height()//Game.second
+        self.speed_x = (Game.instance.width() // 2)//Game.second #I made it double as fast as before
         self.boost = False #mehr dazu: unterer Kommentar
         self.boost_factor = 2.0 #when space is pressed, the movement will be faster by this factor
 
@@ -32,26 +32,28 @@ class Player:
     
     def up(self):
         """Moves the Player up."""
-        if self.hitbox().top > Game.instance.screen().top+self.bounds[0]:
-            self.y -= self.speed_y if not self.boost else self.speed_y*self.boost_factor
+        if self.hitbox().top > Game.instance.screen().top+Game.instance.bounds[0]:
+            Game.instance.car_speed -= self.speed_y if not self.boost else self.speed_y*self.boost_factor
+            self.y -= Game.instance.car_speed
 
     def down(self):
         """Moves the Player down."""
-        if self.hitbox().bottom < Game.instance.screen().bottom+self.bounds[1]:
+        if self.hitbox().bottom < Game.instance.screen().bottom+Game.instance.bounds[1]:
             Game.instance.car_speed += self.speed_y if not self.boost else self.speed_y*self.boost_factor
             self.x += Game.instance.car_speed
 
     def accelerate(self):
         """Accelerates the Player."""
-        if self.hitbox().right < Game.instance.screen().right+self.bounds[3]:
+        if self.hitbox().right < Game.instance.screen().right+Game.instance.bounds[3]:
 #            print "ACC"
-            self.x += self.speed_x if not self.boost else self.speed_x*self.boost_factor
+            Game.instance.car_speed += self.speed_x if not self.boost else self.speed_y*self.boost_factor
+            self.x += Game.instance.car_speed
 #        else:
 #            print self.hitbox().right, Game.instance.screen().right
 
     def decelerate(self):
         """Decelerates the Player."""
-        if self.hitbox().left > Game.instance.screen().left+self.bounds[2]:
+        if self.hitbox().left > Game.instance.screen().left+Game.instance.bounds[2]:
 #            print "DEC"
             Game.instance.car_speed -= self.speed_x if not self.boost else self.speed_x*self.boost_factor
             self.x -= Game.instance.car_speed
@@ -61,8 +63,8 @@ class Player:
 #        """Sets the image (and hitbox) of the Player. Argument:
 #        img = pygame.Surface containing the image for the Enity.
 #        """
-#        Game.instance.player_img = img
-#        self.hitbox() = Game.instance.player_img.get_rect().move(self.x, self.y)
+#        self.img = img
+#        self.hitbox = self.img.get_rect().move(self.x, self.y)
 
     def render(self, surface):
         """Blits the Player on 'surface'."""
@@ -273,9 +275,9 @@ class Deer:
             width = logo.get_width()
             radius = math.sqrt((width//2)**2 + (width//2)**2)
             if self.__key_frame == -1: self.__key_frame = randint(0,anim_len-1)
-            frame_unit = radius*2*Math.PI // anim_len
+            frame_unit = radius*2*math.pi // anim_len
             offset = self.__key_frame*frame_unit #Bogenmaß
-            offset2 = offset+radius*(math.asin(0.5)//90*Math.PI) #angle*2//360*Math.PI*2; width//2//width = 0.5
+            offset2 = offset+radius*(math.asin(0.5)//90*math.pi) #angle*2//360*math.pi*2; width//2//width = 0.5
             #logo_angled_width = math.sqrt(width**2 - ((math.sin(float(offset)/radius)-math.sin(float(offset2)/radius))*radius)**2) #even simpler:
             x_distance = math.cos(float(offset)/radius)*radius
             x_distance2 = math.cos(float(offset2)/radius)*radius
