@@ -5,7 +5,7 @@ import os.path
 import sys
 import math
 
-#TODO:   - load pictures and create_frame methods
+#TODO:   - create_frame methods
 
 #I suggest that we declare all instance variables in the constructor
 
@@ -38,7 +38,8 @@ class Player:
     def down(self):
         """Moves the Player down."""
         if self.hitbox().bottom < Game.instance.screen().bottom+self.bounds[1]:
-            self.y += self.speed_y if not self.boost else self.speed_y*self.boost_factor
+            Game.instance.car_speed += self.speed_y if not self.boost else self.speed_y*self.boost_factor
+            self.x += Game.instance.car_speed
 
     def accelerate(self):
         """Accelerates the Player."""
@@ -52,7 +53,8 @@ class Player:
         """Decelerates the Player."""
         if self.hitbox().left > Game.instance.screen().left+self.bounds[2]:
 #            print "DEC"
-            self.x -= self.speed_x if not self.boost else self.speed_x*self.boost_factor
+            Game.instance.car_speed -= self.speed_x if not self.boost else self.speed_x*self.boost_factor
+            self.x -= Game.instance.car_speed
 
 #Obsolete - use set_player_image() instead
 #    def set_img(self, img):
@@ -156,7 +158,7 @@ class Deer:
 
     def hitbox(self):
         """Returns the current hitbox for the current image"""
-        img = Game.instance.deer_imgs[img]
+        img = Game.instance.deer_imgs[self.img]
         if not self.__angle == 0: img = pygame.transform.rotate(img, self.__angle)
         return img.get_rect().move(self.x, self.y)
 
@@ -340,6 +342,7 @@ class Game(object):
         pygame.mouse.set_visible(1)
         
         self.game_speed = 300//Game.second
+        self.car_speed = 0
         self.player = Player()
 
         self.deer = []
@@ -355,7 +358,8 @@ class Game(object):
         self.virus_imgs = None
         self.logo_imgs = None
         self.graphics = None
-        
+
+        self.__time = 0.0
         self.__clock = pygame.time.Clock()
         self.__running = False
         
@@ -382,10 +386,12 @@ class Game(object):
         self.__pause = False
         self.__game_over = False
         self.game_speed = 300//Game.second
+        self.car_speed = 0
         self.__pos = 0
         self.__next_deer = Game.second
         self.__next_deer_max = Game.second*3
         self.__next_deer_min = Game.second*7/3
+        self.__time = 0.0
         self.__running = False
         self.__restart = True #will restart run()
         #self.__clock = pygame.time.Clock()
@@ -403,6 +409,10 @@ class Game(object):
         for deer in self.deer:
             deer.render(self.__screen)
         #draw stats (score, time (with tenth seconds))
+            #spawned_deer
+            #time
+            #start or pause sign (optional)
+            speed = int(round((self.game_speed + self.car_speed)*Game.second//(self.player_img.get_width()/4.5)*3.6)) #speed
     
     def create_pause_frame(self, surface):
         """Displays the pause menu on the given Surface object."""
@@ -422,6 +432,7 @@ class Game(object):
 
     @staticmethod
     def load_graphics(): #we use it because you don't want global variables as I understood
+        """Gets all needed graphics and puts them in one variable."""
         Game.instance.set_street_img(Game.path("rue_n_clip.png"), Game.path("rue_matrix_clip.png"))
         Game.instance.set_player_img(Game.path("img", "voiture_r2.png"))
         Game.instance.set_deer_img([Game.path("img", "chevreuil_m_gif%i.png" % i) for i in (1, 2, 3, 2)])
@@ -514,7 +525,7 @@ class Game(object):
         #    move_type = randint(0, 11)
         #I would do it like this:
         n = 23
-        mt = randint(0,n)
+        mt = randint(0, n)
         p = [3, 3, 2, 2, 1, 1] #probabilites, repeated to 12 elements, all elements' sum must be n+1
         for i in range(1,12):
             n -= p[i%len(p)]
@@ -532,9 +543,13 @@ class Game(object):
         maximum_count = 4 #more than 4 deer aren't allowed on the road
         maximum_speed = 50
         new_game = True
+        self.__time = 0.0
+        self.car_speed = 0
         self.__running = True
         while self.__running:
             self.__clock.tick(Game.second)
+            self.__time += 100.0/Game.second
+            if round(self.__time, 2) - round(self.__time) == -0.01: self.__time = round(self.__time)
             #tick fits rather in the active gameplay section
             
             #EXIT CONDITION
@@ -586,6 +601,7 @@ class Game(object):
 
             else:
                 tick += 1
+                self.car_speed = 0
                 if not new_game:
                     #USER INPUT:
                     if keys[pygame.K_RIGHT]:
