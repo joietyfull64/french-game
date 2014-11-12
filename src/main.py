@@ -5,10 +5,6 @@ import os.path
 import sys
 import math
 
-# TODO:   - create_frame methods
-#        - load "email.png" with set_player_img()
-#        - remove Game.img_path
-
 # I suggest that we declare all instance variables in the constructor
 
 import pygame
